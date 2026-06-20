@@ -1,0 +1,97 @@
+:root {
+  --primary: #8B4513;
+  --secondary: #D4A373;
+  --accent: #FF6B35;
+  --bg: #FFF8F0;
+  --bg-dark: #2C1810;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #FFF8F0;
+  font-family: 'DM Sans', sans-serif;
+  color: #1A0A00;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D4A373; border-radius: 4px; }
+
+/* Traditional pattern overlay utility */
+.pattern-bg {
+  background-image:
+    repeating-linear-gradient(45deg, rgba(212,163,115,0.04) 0px, rgba(212,163,115,0.04) 1px, transparent 1px, transparent 12px),
+    repeating-linear-gradient(-45deg, rgba(212,163,115,0.04) 0px, rgba(212,163,115,0.04) 1px, transparent 1px, transparent 12px);
+}
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeInUp 0.35s ease; }
+
+/* Pulse for live indicators */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(1.3); }
+}
+.pulse { animation: pulse 1.5s ease-in-out infinite; }
+
+/* Glow for new kitchen orders */
+@keyframes orderGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,53,0); }
+  50%       { box-shadow: 0 0 0 6px rgba(255,107,53,0.25); }
+}
+.order-glow { animation: orderGlow 2s ease-in-out infinite; }
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, rgba(212,163,115,0.08) 25%, rgba(212,163,115,0.18) 37%, rgba(212,163,115,0.08) 63%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Float animation for emojis */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.float { animation: float 3s ease-in-out infinite; }
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, #FF6B35, #FFB347);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Smooth page transitions */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.page-transition-exit {
+  opacity: 1;
+}
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
