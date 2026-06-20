@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Box, Typography, TextField, Button, Stack, Divider,
   Alert, CircularProgress, Paper
@@ -14,7 +14,9 @@ const ROLES = [
 
 export default function AuthPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { signIn, signUp } = useAuth()
+  const from = location.state?.from?.pathname || '/'
   const [mode, setMode] = useState('signin')
   const [role, setRole] = useState('customer')
   const [form, setForm] = useState({ email: '', password: '', name: '' })
@@ -30,7 +32,7 @@ export default function AuthPage() {
       } else {
         await signUp(form.email, form.password, form.name, role)
       }
-      navigate('/')
+      navigate(from, { replace: true })
     } catch (err) {
       setError(err.message || 'Authentication failed')
     } finally {
@@ -39,8 +41,7 @@ export default function AuthPage() {
   }
 
   function handleDemo(demoRole) {
-    // Demo login bypass — no real Supabase call needed
-    navigate(demoRole === 'kitchen' ? '/kitchen' : demoRole === 'admin' ? '/admin' : '/')
+    navigate(from !== '/' ? from : demoRole === 'kitchen' ? '/kitchen' : demoRole === 'admin' ? '/admin' : '/')
   }
 
   return (

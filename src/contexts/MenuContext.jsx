@@ -16,18 +16,29 @@ function getMealTimeSlot() {
 export function MenuProvider({ children }) {
   /* ── raw items (from DB or fallback) ── */
   const [items, setItems] = useState(MENU_DATA)
+  const [menuLoading, setMenuLoading] = useState(false)
+  const [menuError, setMenuError] = useState(null)
 
-  useEffect(() => {
-    async function fetchMenu() {
+  const fetchMenu = useCallback(async () => {
+    setMenuLoading(true)
+    setMenuError(null)
+    try {
       const { data, error } = await supabase
         .from('menu')
         .select('*')
         .eq('is_active', true)
         .order('category')
-      if (!error && data && data.length > 0) setItems(data)
+      if (error) throw error
+      if (data && data.length > 0) setItems(data)
+    } catch (err) {
+      console.warn('MenuContext: Supabase fetch failed, using fallback data —', err.message)
+      setMenuError(err.message)
+    } finally {
+      setMenuLoading(false)
     }
-    fetchMenu()
   }, [])
+
+  useEffect(() => { fetchMenu() }, [fetchMenu])
 
   /* ── filter state ── */
   const [activeCategory, setActiveCategory] = useState('All')
@@ -165,6 +176,8 @@ export function MenuProvider({ children }) {
     filterChips: FILTER_CHIPS,
     moodOptions: MOOD_OPTIONS,
     // state
+    menuLoading,
+    menuError,
     activeCategory,
     activeFilters,
     activeMood,
@@ -180,6 +193,7 @@ export function MenuProvider({ children }) {
     setSearch,
     clearAllFilters,
     getRandomDish,
+    refreshMenu: fetchMenu,
   }
 
   return (

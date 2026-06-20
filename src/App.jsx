@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 import Layout from './components/layout/Layout'
 import HomePage from './pages/HomePage'
@@ -13,14 +13,14 @@ import { CircularProgress, Box } from '@mui/material'
 
 function ProtectedRoute({ children, requiredRole }) {
   const { user, profile, loading } = useAuth()
+  const location = useLocation()
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
       <CircularProgress sx={{ color: '#8B4513' }} />
     </Box>
   )
-  // Demo mode: skip auth check
-  // if (!user) return <Navigate to="/auth" replace />
-  // if (requiredRole && profile?.role !== requiredRole && profile?.role !== 'admin') return <Navigate to="/" replace />
+  if (!user) return <Navigate to="/auth" replace state={{ from: location }} />
+  if (requiredRole && profile?.role !== requiredRole && profile?.role !== 'admin') return <Navigate to="/" replace />
   return children
 }
 
@@ -35,8 +35,8 @@ export default function App() {
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="menu" element={<MenuPage />} />
-        <Route path="orders" element={<OrderTrackingPage />} />
-        <Route path="payment" element={<PaymentPage />} />
+        <Route path="orders" element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>} />
+        <Route path="payment" element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
         <Route path="kitchen" element={
           <ProtectedRoute requiredRole="kitchen"><KitchenPage /></ProtectedRoute>
         } />

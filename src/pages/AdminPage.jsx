@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Box, Typography, Grid, Paper, Tabs, Tab, Stack,
   Button, Table, TableHead, TableRow, TableCell, TableBody,
@@ -14,7 +14,9 @@ import {
   ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend
 } from 'recharts'
 import { useOrders } from '../contexts/OrderContext'
-import { MENU_DATA, CATEGORIES } from '../data/sampleData'
+import { useMenu } from '../contexts/MenuContext'
+import { supabase } from '../supabaseClient'
+import { CATEGORIES } from '../data/sampleData'
 import OrderStatusChip from '../components/tracking/OrderStatusChip'
 
 const WEEK_DATA = [
@@ -64,11 +66,14 @@ const EMPTY_ITEM = { name: '', price: '', category: 'Breakfast', type: 'veg', em
 
 export default function AdminPage() {
   const { orders, updateOrderStatus } = useOrders()
+  const { items: contextItems, refreshMenu } = useMenu()
   const [tab, setTab] = useState(0)
-  const [menuItems, setMenuItems] = useState(MENU_DATA)
+  const [menuItems, setMenuItems] = useState(contextItems)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editItem, setEditItem] = useState(null)
   const [form, setForm] = useState(EMPTY_ITEM)
+
+  useEffect(() => { setMenuItems(contextItems) }, [contextItems])
 
   const totalRevenue = orders.reduce((s, o) => s + (o.total || o.amount || 0), 0)
   const todayRevenue = 8420 + totalRevenue
@@ -79,16 +84,28 @@ export default function AdminPage() {
 
   function handleSave() {
     if (!form.name || !form.price) return
+    const payload = { ...form, price: Number(form.price) }
+
     if (editItem) {
-      setMenuItems(prev => prev.map(i => i.id === editItem.id ? { ...i, ...form, price: Number(form.price) } : i))
+      setMenuItems(prev => prev.map(i => i.id === editItem.id ? { ...i, ...payload } : i))
+      supabase.from('menu').update(payload).eq('id', editItem.id).then(({ error }) => {
+        if (!error) refreshMenu()
+      })
     } else {
-      setMenuItems(prev => [...prev, { ...form, id: Date.now(), price: Number(form.price), is_popular: false, is_active: true }])
+      const newItem = { ...payload, id: Date.now(), is_popular: false, is_active: true }
+      setMenuItems(prev => [...prev, newItem])
+      supabase.from('menu').insert(newItem).then(({ error }) => {
+        if (!error) refreshMenu()
+      })
     }
     handleClose()
   }
 
   function handleDelete(id) {
     setMenuItems(prev => prev.filter(i => i.id !== id))
+    supabase.from('menu').update({ is_active: false }).eq('id', id).then(({ error }) => {
+      if (!error) refreshMenu()
+    })
   }
 
   return (
