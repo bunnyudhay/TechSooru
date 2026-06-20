@@ -41,12 +41,18 @@ export function AuthProvider({ children }) {
     if (data.user) {
       await supabase.from('users').insert({ id: data.user.id, email, name, role })
     }
+    setUser(data.session?.user ?? data.user ?? null)
+    if (data.session?.user) fetchProfile(data.session.user.id)
+    else setLoading(false)
     return data
   }
 
   async function signIn(email, password) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
+    setUser(data.session?.user ?? null)
+    if (data.session?.user) fetchProfile(data.session.user.id)
+    else setLoading(false)
     return data
   }
 
