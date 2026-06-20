@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Box, Typography, Button, TextField, Stack, Divider,
@@ -30,6 +30,12 @@ export default function PaymentPage() {
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
 
   if (items.length === 0) {
     return (
@@ -78,19 +84,27 @@ export default function PaymentPage() {
             notes,
           })
           clearCart()
+          document.body.style.overflow = ''
           navigate('/orders')
         } catch (err) {
           setError('Order placement failed. Please contact staff.')
         } finally {
           setLoading(false)
+          document.body.style.overflow = ''
         }
       },
       modal: {
-        ondismiss: () => setLoading(false),
+        ondismiss: () => {
+          setLoading(false)
+          document.body.style.overflow = ''
+        },
       },
     }
 
     const rzp = new window.Razorpay(options)
+    rzp.on('payment.failed', () => {
+      document.body.style.overflow = ''
+    })
     rzp.open()
   }
 
